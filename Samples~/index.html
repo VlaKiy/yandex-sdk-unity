@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Stickman Zombie Apocalypse</title>
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      *, *:before, *:after {
+        box-sizing: inherit;
+      }
+      body {
+        margin: 0;
+        background: #444;
+      }
+      #gameContainer {
+        width: 100vw;
+        height: 100vh;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      /* try to handle mobile dialog */
+      canvas + * {
+        z-index: 2;
+      }
+      .logo {
+          display: block;
+          width: max-width: 100vw;
+          height: max-height: 70vh;
+      }
+
+      .progress {
+          margin: 1.5em;
+          border: 1px solid white;
+          width: 50vw;
+          display: none;
+      }
+      .progress .full {
+          margin: 2px;
+          background: white;
+          height: 1em;
+          transform-origin: top left;
+      }
+
+      #loader {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .spinner,
+      .spinner:after {
+        border-radius: 50%;
+        width: 5em;
+        height: 5em;
+      }
+      .spinner {
+        margin: 10px;
+        font-size: 10px;
+        position: relative;
+        text-indent: -9999em;
+        border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+        border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+        border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+        border-left: 1.1em solid #ffffff;
+        transform: translateZ(0);
+        animation: spinner-spin 1.1s infinite linear;
+      }
+      @keyframes spinner-spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="gameContainer"></div>
+    <div id="loader">
+      <img class="logo" src="logo.png">
+      <div class="spinner"></div>
+      <div class="progress"><div class="full"></div></div>
+    </div>
+  </body>
+
+  <script src="Build/UnityLoader.js"></script>
+  <!-- Yandex Games SDK -->
+    
+  <script src="https://yandex.ru/games/sdk/v2"></script>
+  <script>
+  var gameInstance = UnityLoader.instantiate("gameContainer", "Build/CHANGE_THIS.json", {onProgress: UnityProgress});
+  function UnityProgress(gameInstance, progress) {
+    if (!gameInstance.Module) {
+      return;
+    }
+    const loader = document.querySelector("#loader");
+    if (!gameInstance.progress) {
+      const progress = document.querySelector("#loader .progress");
+      progress.style.display = "block";
+      gameInstance.progress = progress.querySelector(".full");
+      loader.querySelector(".spinner").style.display = "none";
+    }
+    gameInstance.progress.style.transform = `scaleX(${progress})`;
+    if (progress === 1 && !gameInstance.removeTimeout) {
+      gameInstance.removeTimeout = setTimeout(function() {
+          loader.style.display = "none";
+      }, 2000);
+    }
+  }
+
+    let ysdk;
+    var player;
+    var lb;
+    var isFirstLaunch = true;
+
+    YaGames.init({
+      adv: {
+      
+        onAdvClose: wasShown => {
+      
+          console.info('adv closed!');
+        
+        }
+      }
+    })
+    
+    .then(_ysdk => {
+    
+      _ysdk.adv.showFullscreenAdv();
+    
+      ysdk = _ysdk;
+
+      }).catch(err => {
+            // Ошибка при инициализации объекта Player.
+      });
+    
+    function Allgames() {
+    
+      document.location.href = "";
+    
+    }
+    
+    function ShowAd() {
+        ysdk.adv.showFullscreenAdv({
+            callbacks: {
+                onClose: function(wasShown) {
+                    gameInstance.SendMessage("YandexSDK", "OnInterstitialShown");
+                    // some action after close
+                },
+                onError: function(error) {
+                    gameInstance.SendMessage("YandexSDK", "OnInterstitialFailed", error);
+                    // some action on error
+                }
+            }
+        })
+    
+    }
+    
+    function ShowRewarded(id) {
+        ysdk.adv.showRewardedVideo({
+            callbacks: {
+                onOpen: () => {
+                    gameInstance.SendMessage("YandexSDK", "OnRewardedOpen", id);
+                    console.log('Video ad open.');
+                },
+                onRewarded: () => {
+                    gameInstance.SendMessage("YandexSDK", "OnRewarded", id);
+                    console.log('Rewarded!');
+                },
+                onClose: () => {
+                    gameInstance.SendMessage("YandexSDK", "OnRewardedClose", id);
+                    console.log('Video ad closed.');
+                }, 
+                onError: (e) => {
+                    var data = {"id" : id, "error" : e};
+                    gameInstance.SendMessage("YandexSDK", "OnRewardedError", JSON.stringify(data));
+                    console.log('Error while open video ad:', e);
+                }
+            }
+        })
+    }
+
+    function Auth() {
+      InitPlayer().then(_player => {
+        if (_player.getMode() === 'lite') {
+          // Игрок не авторизован.
+          ysdk.auth.openAuthDialog().then(() => {
+              // Игрок успешно авторизован
+              InitPlayer().catch(err => {
+                  // Ошибка при инициализации объекта Player.
+              });
+              console.log("auth ok");
+            }).catch(() => {
+              // Игрок не авторизован.
+              console.log("auth failed");
+            });
+        }
+      }).catch(err => {
+          // Ошибка при инициализации объекта Player.
+      });
+    }
+
+    function InitPlayer() {
+      return ysdk.getPlayer().then(_player => {
+          player = _player;
+
+          return player;
+      });
+    }
+
+    function SetData(data) {
+      console.log(data);
+      var json = JSON.parse(data);
+      console.log(json);
+
+      InitPlayer().then(_player => {
+        _player.setData({
+          _isSoundOn: json._isSoundOn,
+          _typeOfMove: json._typeOfMove,
+          _isHelperActive: json._isHelperActive,
+          _kills: json._kills,
+        }).then(() => {
+            console.log('data is set');
+        }).catch(err => {
+          console.log("Player not initialized");
+        });
+      });
+    }
+
+    function GetData() {
+      InitPlayer().then(_player => {
+        _player.getData().then(data => {
+          console.log(data);
+          console.log(JSON.stringify(data));
+          gameInstance.SendMessage("YandexSDK", "PlayerGetData", JSON.stringify(data));
+          console.log("Data got");
+        }).catch(err => {
+          console.log("Dont get data");
+        });
+      }).catch(err => {
+          console.log("Player not initialized");
+        });
+    }
+
+    function SetLiderboard(lbName, value) {
+      var count = Number(value);
+
+      ysdk.isAvailableMethod('leaderboards.setLeaderboardScore').then(res => {
+        if (res == true) {
+          console.log("Leaderboard is available");
+
+          ysdk.getLeaderboards()
+          .then(lb => {
+            lb.setLeaderboardScore(lbName, count);
+            console.log("Liderboard " + lbName + " will be set: " + typeof count + " " + count);
+            lb.getLeaderboardEntries(lbName).then(res => console.log(res));
+          }).catch(err => {
+            console.log("Liderboard " + lbName + " set failed: " + typeof count + " " + count);
+          });
+        } else {
+          console.log("Leaderboard not available");
+        }
+      }).catch(err => console.log("Leaderboard not available"));
+    }
+  </script>
+
+</html>
+
