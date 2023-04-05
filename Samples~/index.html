@@ -103,6 +103,7 @@
     
   <script src="https://yandex.ru/games/sdk/v2"></script>
   <script>
+  UnityLoader.compatibilityCheck = function (e, t) {t();};
   var gameInstance = UnityLoader.instantiate("gameContainer", "Build/CHANGE_THIS.json", {onProgress: UnityProgress});
   function UnityProgress(gameInstance, progress) {
     if (!gameInstance.Module) {
