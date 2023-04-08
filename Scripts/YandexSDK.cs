@@ -71,7 +71,7 @@ public class YandexSDK : MonoBehaviour
     public Queue<int> rewardedAdPlacementsAsInt = new Queue<int>();
     public Queue<string> rewardedAdsPlacements = new Queue<string>();
 
-    [SerializeField] private GameObject _rewardedTestPanel;
+    public GameObject _rewardedTestPanel;
 
     private Transform _canvasTransform;
 
@@ -83,10 +83,7 @@ public class YandexSDK : MonoBehaviour
     [System.Serializable]
     public class DataHolder
     {
-        public bool _isSoundOn = true;
-        public int _typeOfMove = 0;
-        public bool _isHelperActive = true;
-        public int _kills = 0;
+        public int _coin = 0;
     }
 
     public DataHolder _dataHolder;

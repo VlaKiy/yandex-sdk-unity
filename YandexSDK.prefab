@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 12778234783248565}
-  - component: {fileID: 12778234783248564}
+  - component: {fileID: 4814570996337627223}
   m_Layer: 0
   m_Name: YandexSDK
   m_TagString: Untagged
@@ -31,7 +31,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &12778234783248564
+--- !u!114 &4814570996337627223
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -43,5 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfdda3e0fb20e24d9f2ea7b5acee7bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Instance: {fileID: 0}
-  text: {fileID: 0}
+  _rewardedTestPanel: {fileID: 1726570718311496318, guid: b0df1924c47e46a4e84271b9458bb603,
+    type: 3}
+  _dataHolder:
+    _coin: 0
