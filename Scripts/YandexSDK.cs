@@ -62,14 +62,8 @@ public class YandexSDK : MonoBehaviour
     /// </summary>
     public event Action<string> onPurchaseFailed;
 
-    /// <summary>
-    /// Данные получены
-    /// </summary>
     public event Action<DataHolder> onPlayerGetData;
 
-    /// <summary>
-    /// Лидерборд изменен
-    /// </summary>
     public event Action onPlayerSetLiderboard;
 
     public event Action onClose;
@@ -77,15 +71,24 @@ public class YandexSDK : MonoBehaviour
     public Queue<int> rewardedAdPlacementsAsInt = new Queue<int>();
     public Queue<string> rewardedAdsPlacements = new Queue<string>();
 
-    [System.Serializable]
-    public class DataHolder // Сюда заносить данные, которые вы собираетесь хранить
+    [SerializeField] private GameObject _rewardedTestPanel;
+
+    private Transform _canvasTransform;
+
+    private void Start()
     {
-        public bool _template = true;
+        _canvasTransform = GameObject.Find("Canvas").transform;
     }
 
-    /// <summary>
-    /// Все игровые данные
-    /// </summary>
+    [System.Serializable]
+    public class DataHolder
+    {
+        public bool _isSoundOn = true;
+        public int _typeOfMove = 0;
+        public bool _isHelperActive = true;
+        public int _kills = 0;
+    }
+
     public DataHolder _dataHolder;
 
     private void Awake()
@@ -126,6 +129,7 @@ public class YandexSDK : MonoBehaviour
 #endif
     }
 
+
     /// <summary>
     /// Call this to get data
     /// </summary>
@@ -142,15 +146,12 @@ public class YandexSDK : MonoBehaviour
 
     private void PlayerGetData(string data)
     {
-        print("Get new data. Look down");
-        print(JsonUtility.FromJson<DataHolder>(data));
         _dataHolder = JsonUtility.FromJson<DataHolder>(data);
         onPlayerGetData?.Invoke(_dataHolder);
-        print("Data updated");
     }
 
     /// <summary>
-    /// Call this to set liderboard data
+    /// Call this to set liderboard
     /// </summary>
     public void SetLiderboard(string lbName, int value)
     {
@@ -189,11 +190,16 @@ public class YandexSDK : MonoBehaviour
             rewardedAdsPlacements.Enqueue(placement);
 #endif
 #if UNITY_EDITOR
-            print("Rewarded AD showed");
-            onRewardedAdOpened?.Invoke(0);
-            onRewardedAdReward?.Invoke(placement);
-            onRewardedAdClosed?.Invoke(0);
+            rewardedAdPlacementsAsInt.Enqueue(ShowTestRewardedAd(placement));
+            rewardedAdsPlacements.Enqueue(placement);
 #endif
+    }
+
+    private int ShowTestRewardedAd(string placement)
+    {
+        var panel = Instantiate(_rewardedTestPanel, GameObject.Find("Canvas").transform);
+        panel.SetActive(true);
+        return 1;
     }
 
     /// <summary>
