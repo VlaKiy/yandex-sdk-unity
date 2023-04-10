@@ -6,7 +6,7 @@ public class RewardedAdPanel : MonoBehaviour
 {
     [SerializeField] private int _timeWait = 3;
     private float _timeSeconds = 1f;
-    private WaitForSeconds _delay;
+    private WaitForSecondsRealtime _delay;
 
     [SerializeField] private Text _countTimeUI;
 
@@ -14,13 +14,17 @@ public class RewardedAdPanel : MonoBehaviour
 
     private YandexSDK _sdk;
 
+    private void Awake()
+    {
+        _sdk = YandexSDK.instance;
+        RewardedADOpen();
+    }
+
     private void Start()
     {
         _exitObject.SetActive(false);
 
-        _sdk = YandexSDK.instance;
-        RewardedADOpen();
-        _delay = new WaitForSeconds(_timeSeconds);
+        _delay = new WaitForSecondsRealtime(_timeSeconds);
         StartCoroutine(MakeWaiter());
     }
 
