@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -74,10 +75,12 @@ public class YandexSDK : MonoBehaviour
     public GameObject _rewardedTestPanel;
 
     private Transform _canvasTransform;
+    private string _dataPath = "data.json";
 
     private void Start()
     {
         _canvasTransform = GameObject.Find("Canvas").transform;
+        GetData();
     }
 
     [System.Serializable]
@@ -122,8 +125,17 @@ public class YandexSDK : MonoBehaviour
             print(data);
 #endif
 #if UNITY_EDITOR
+            SetJSONData();
             print("Set data request will be send");
 #endif
+    }
+
+    private void SetJSONData()
+    {
+        var data = JsonUtility.ToJson(_dataHolder);
+
+        File.WriteAllText(_dataPath, data);
+        Debug.Log(File.ReadAllText(_dataPath));
     }
 
 
@@ -136,8 +148,8 @@ public class YandexSDK : MonoBehaviour
             playerGetData();
 #endif
 #if UNITY_EDITOR
+            PlayerGetData(File.ReadAllText(_dataPath));
             print("Get data request will be send");
-            PlayerGetData(JsonUtility.ToJson(_dataHolder));
 #endif
     }
 
