@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class YandexSDK : MonoBehaviour
 {
@@ -32,42 +33,42 @@ public class YandexSDK : MonoBehaviour
     private static extern void Purchase(string id);
 
     public UserData user;
-    public event Action onUserDataReceived;
+    public UnityEvent onUserDataReceived = new UnityEvent();
 
-    public event Action onInterstitialShown;
-    public event Action<string> onInterstitialFailed;
+    public UnityEvent onInterstitialShown = new UnityEvent();
+    public StringEvent onInterstitialFailed = new StringEvent();
     /// <summary>
     /// Пользователь открыл рекламу
     /// </summary>
-    public event Action<int> onRewardedAdOpened;
+    public IntEvent onRewardedAdOpened = new IntEvent();
     /// <summary>
     /// Пользователь должен получить награду за просмотр рекламы
     /// </summary>
-    public event Action<string> onRewardedAdReward;
+    public StringEvent onRewardedAdReward = new StringEvent();
     /// <summary>
     /// Пользователь закрыл рекламу
     /// </summary>
-    public event Action<int> onRewardedAdClosed;
+    public IntEvent onRewardedAdClosed = new IntEvent();
     /// <summary>
     /// Вызов/просмотр рекламы повлёк за собой ошибку
     /// </summary>
-    public event Action<string> onRewardedAdError;
+    public StringEvent onRewardedAdError = new StringEvent();
     /// <summary>
     /// Покупка успешно совершена
     /// </summary>
-    public event Action<string> onPurchaseSuccess;
+    public StringEvent onPurchaseSuccess = new StringEvent();
     /// <summary>
     /// Покупка не удалась: в консоли разработчика не добавлен товар с таким id,
     /// пользователь не авторизовался, передумал и закрыл окно оплаты,
     /// истекло отведенное на покупку время, не хватило денег и т. д.
     /// </summary>
-    public event Action<string> onPurchaseFailed;
+    public StringEvent onPurchaseFailed = new StringEvent();
 
-    public event Action<DataHolder> onPlayerGetData;
+    public DataHolderEvent onPlayerGetData = new DataHolderEvent();
 
-    public event Action onPlayerSetLiderboard;
+    public UnityEvent onPlayerSetLiderboard = new UnityEvent();
 
-    public event Action onClose;
+    public UnityEvent onClose = new UnityEvent();
 
     public Queue<int> rewardedAdPlacementsAsInt = new Queue<int>();
     public Queue<string> rewardedAdsPlacements = new Queue<string>();
@@ -329,3 +330,12 @@ public struct UserData
     public string avatarUrlMedium;
     public string avatarUrlLarge;
 }
+
+[Serializable]
+public class StringEvent : UnityEvent<string> { }
+
+[Serializable]
+public class IntEvent : UnityEvent<int> { }
+
+[Serializable]
+public class DataHolderEvent : UnityEvent<YandexSDK.DataHolder> { }
